@@ -53,7 +53,7 @@ def beginMeasurement(comPort: str, filename: str):
     if comPort and filename:
         
         def read_serial():
-            serial_port = comPort.replace("dev","dev/")  # Replace with your serial port
+            serial_port = comPort.replace("dev","/dev/")  # Replace with your serial port
             baud_rate = 2000000  # Match the baud rate with Arduino
             output_file = filename
             buffer_size = 100  # Adjust buffer size as needed
