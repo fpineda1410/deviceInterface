@@ -57,7 +57,7 @@ def beginMeasurement(comPort: str, filename: str):
             baud_rate = 2000000  # Match the baud rate with Arduino
             output_file = filename
             buffer_size = 100  # Adjust buffer size as needed
-            
+            print(output_file)
             buffer = []
             try:
                 with serial.Serial(serial_port, baud_rate) as ser, open(output_file, 'w+') as f:
