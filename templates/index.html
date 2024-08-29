@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+	<title>PPG Multiwavelength</title>
+</head>
+
+<body>
+	<div class="collapse" id="navbarToggleExternalContent">
+		<div class="bg-light p-4">
+		  <h5 class="text-black h4">PPG Multiwavelength</h5>
+		  <span class="text-muted">A platform created by Felipe Pineda Alpizar</span>
+		</div>
+	  </div>
+	  <nav class="navbar navbar-dark bg-dark">
+		<div class="container-fluid">
+		  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+			<h4>PPG Multiwavelength</h4>
+		  </button>
+		</div>
+	  </nav>
+
+	<div class="m-5">
+		<h1 transition:fade class="display-1 m-5 text-center">PPG Multiwavelength System</h1>
+		<form id="myForm">
+		
+			<div class="m-5">
+			  <h1 for="exampleInputEmail1" class="form-label display-6">ParticipantID</h1> 
+			  <input id="name" type="text" class="form-control" aria-describedby="emailHelp" >
+			</div>
+			<div class="m-5">
+			  <h1 for="exampleInputEmail1" class="form-label display-6">Posture</h1> 
+			  <input id="posture" type="text" class="form-control" aria-describedby="emailHelp" >
+			</div>
+			<div class="container text-center">
+				<div class="row align-items-start">
+					<div class="col">
+						<div  class="form-group m-5">
+							<label for="mano" class="form-label display-6">Available Ports</label>
+							<div id ="COMports"></div>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+			
+			<div class="d-flex justify-content-center">
+				<button type="button" class="btn btn-primary m-3" id="fetchButton"><h1 class="display-6">Detect Sensors</h1></button>
+				<button type="submit" class="btn btn-success m-3" > <h1 class="display-6">Begin Measurement</h1></button>
+				
+			</div>
+			<div id="result">
+				<!-- The loading spinner -->
+				<div id="loadingSpinner" class="spinner-border text-primary m-3" role="status" style="display: none;">
+					<span class="visually-hidden">Loading...</span>
+				</div>
+			</div>
+		</form>
+
+	<script>
+		document.getElementById("fetchButton").addEventListener("click", function() {
+			const requestOptions = {
+				method: "GET",
+				headers: { "Content-Type": "application/json" }
+			};
+			fetch("http://127.0.0.1:8080/getPorts", requestOptions)
+				.then(response => response.json())
+				.then(data => {
+					let resultDiv = document.getElementById("COMports");
+					resultDiv.innerHTML = ''; // Clear previous results
+
+					// Assuming data is an array
+					data['ports'].forEach(item => {
+						if (item['manufacturer'] == 'wch.cn') {
+
+							let checkbox = document.createElement("input");
+							checkbox.type = "checkbox";
+							checkbox.className = "form-check-input m-1";
+							checkbox.id = `port_${item['device']}`;
+							checkbox.name = 'ports';
+							checkbox.value = item['device'];
+							let label = document.createElement("label");
+							label.className = "form-check-label";
+							label.htmlFor = checkbox.id;
+							label.textContent = 'PPG Sensor '+item['device'];
+							resultDiv.appendChild(checkbox);
+							resultDiv.appendChild(label);
+						}
+					});
+				})
+				.catch(error => console.error('Error:', error));
+		});
+
+
+		let form_tag = document.getElementById("myForm");
+		let username = document.getElementById("name");
+		let password = document.getElementById("posture");
+
+		function getSelectedCheckboxes() {
+			// Get all checkboxes with the name "ports"
+			let checkboxes = document.querySelectorAll('input[name="ports"]:checked');
+			
+			// Initialize an array to store the selected values
+			let selectedValues = [];
+			
+			// Iterate over each checked checkbox and push its value to the array
+			checkboxes.forEach((checkbox) => {
+				selectedValues.push(checkbox.value);
+			});
+
+			// Return the array of selected values
+			return selectedValues;
+		}
+
+		form_tag.addEventListener("submit", function(event){
+
+			event.preventDefault();
+
+			// Show the loading spinner
+			let spinner = document.getElementById("loadingSpinner");
+			spinner.style.display = "block";
+
+			document.getElementById("name").disabled = true;
+			document.getElementById("posture").disabled = true;
+
+			var name = document.getElementById("name").value.toLowerCase().replace(/ /g, '_');
+			var posture = document.getElementById("posture").value.toLowerCase().replace(/ /g, '_');
+			
+			let selectedPorts = getSelectedCheckboxes();
+			console.log("Selected Ports:", selectedPorts);
+			
+			if ((name)&&(posture)&&(selectedPorts)){
+				const requestOptions = {
+					method: "GET",
+					headers: { "Content-Type": "application/json" }
+				};
+
+				// Create an array of fetch promises, one for each selected port
+				const fetchPromises = selectedPorts.map(port => {
+					return fetch(`http://127.0.0.1:8000/devicehandler/${port}/${port}`+'output.csv', requestOptions)
+						.then(response => response.json());
+				});
+
+				// Use Promise.all to wait for all fetch requests to resolve
+				Promise.all(fetchPromises)
+					.then(results => {
+						console.log("All fetch requests completed:", results);
+						// Hide the loading spinner
+						spinner.style.display = "none";
+						// Do something with the results here, if needed
+					})
+					.catch(error => {
+						console.error("An error occurred:", error);
+						// Hide the loading spinner in case of error
+						spinner.style.display = "none";
+					});
+
+			} else {
+				document.getElementById("name").disabled = false;
+				document.getElementById("posture").disabled = false;
+				spinner.style.display = "none";
+				alert("Error: Double Check all the fields and spaces");
+			}
+		});
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+	
+</body>
+</html>
