@@ -30,6 +30,7 @@ def list_available_ports():
 
 # Define a list of origins that are allowed to make requests to your API
 origins = [
+    "*",
     "http://localhost",
     "http://localhost:8080",
     "http://127.0.0.1:8000",
