@@ -66,7 +66,7 @@
 				method: "GET",
 				headers: { "Content-Type": "application/json" }
 			};
-			fetch("http://127.0.0.1:8080/getPorts", requestOptions)
+			fetch("http://127.0.0.1:8000/getPorts", requestOptions)
 				.then(response => response.json())
 				.then(data => {
 					let resultDiv = document.getElementById("COMports");
@@ -74,7 +74,7 @@
 
 					// Assuming data is an array
 					data['ports'].forEach(item => {
-						if (item['manufacturer'] == 'wch.cn') {
+						//if (item['manufacturer'] == 'wch.cn') {
 
 							let checkbox = document.createElement("input");
 							checkbox.type = "checkbox";
@@ -88,7 +88,7 @@
 							label.textContent = 'PPG Sensor '+item['device'];
 							resultDiv.appendChild(checkbox);
 							resultDiv.appendChild(label);
-						}
+						//}
 					});
 				})
 				.catch(error => console.error('Error:', error));
