@@ -74,7 +74,7 @@
 
 					// Assuming data is an array
 					data['ports'].forEach(item => {
-							item['device'].replace(/\//g, "");
+						item['device'] = item['device'].replace(/\//g, "");
 						//if (item['manufacturer'] == 'wch.cn') {
 
 							let checkbox = document.createElement("input");
