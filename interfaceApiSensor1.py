@@ -4,6 +4,7 @@ import time
 import serial
 import threading
 from fastapi.middleware.cors import CORSMiddleware
+import serial.tools.list_ports
 
 app = FastAPI()
 
