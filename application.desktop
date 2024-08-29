@@ -1,8 +1,7 @@
 [Desktop Entry]
-Version=1.0
-Type=Application
+Name=Your Script Name
+Comment=Description of your script
+Exec=/path/to/your_script.py
+Icon=utilities-terminal
 Terminal=true
-Exec=/usr/bin/python3 /path/to/script_name.py
-Name=Script Name
-Comment=A brief description of your script
-Icon=/path/to/icon/file.ico (optional)
+Type=Application
